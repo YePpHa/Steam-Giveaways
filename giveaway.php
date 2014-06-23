@@ -52,7 +52,7 @@
 					<div class="alert alert-danger">You failed the captcha! Robot scum.</div>
 					<?php
 				} else {
-					$roll = rand(1, $chance);
+					$roll = mt_rand(1, $chance);
 					if ($roll == $chance) {
 						?>
 						<div class="alert alert-success">You won! Hooray! Your <?php echo $platform?> game key is <strong><?php echo $gamekey?></strong>.
