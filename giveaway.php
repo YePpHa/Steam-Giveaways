@@ -41,7 +41,7 @@
 		$stmt->fetch();
 
 		if ($_POST) {
-			if (!isset($_POST['name'])) {
+			if (!isset($_POST['name']) && isset($_POST['key']) && ($_POST['key'] == $gamekey)) {
 
 				require_once('recaptchalib.php');
 				$private_key = 'REDACTED';
@@ -58,6 +58,7 @@
 						<div class="alert alert-success">You won! Hooray! Your <?php echo $platform?> game key is <strong><?php echo $gamekey?></strong>.
 							<p>Please leave a note for the person who gifted you the game. This closes the giveaway and is mandatory.
 								<div class="form" style="margin-top: 20px">
+									<input name="key" type="text" class="hide" value="<?php echo $gamekey; ?>">
 									<form class="form-horizontal" action="" method="POST">
 										<div class="form-group">
 											<label class="col-sm-2 control-label">Your username</label>
