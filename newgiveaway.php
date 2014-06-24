@@ -45,7 +45,7 @@
 			}
 
 			if (!$errors) {
-				$gamename = stripslashes(htmlspecialchars($_POST['gamename']));
+				$gamename = htmlspecialchars($_POST['gamename']);
 				$gamekey = htmlspecialchars($_POST['gamekey']);
 				$gameplatform = htmlspecialchars($_POST['gameplatform']);
 				$chance = (int)$_POST['chance'];
