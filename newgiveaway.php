@@ -45,6 +45,8 @@
 			}
 
 			if (!$errors) {
+        $strong = true;
+        $token = base64_encode(openssl_random_pseudo_bytes(32, $strong));
 				$gamename = stripslashes(htmlspecialchars($_POST['gamename']));
 				$gamekey = htmlspecialchars($_POST['gamekey']);
 				$gameplatform = htmlspecialchars($_POST['gameplatform']);
@@ -56,14 +58,14 @@
 				    die('Unable to connect to database [' . $db->connect_error . ']');
 				}
 
-				$stmt = $db->prepare('INSERT INTO `keys` (gamekey, gametitle, gameplatform, chance) VALUES (?,?,?,?)');
-				$stmt->bind_param('sssi', $gamekey, $gamename, $gameplatform, $chance);
+				$stmt = $db->prepare('INSERT INTO `keys` (token, gamekey, gametitle, gameplatform, chance) VALUES (?,?,?,?,?)');
+				$stmt->bind_param('ssssi', $token, $gamekey, $gamename, $gameplatform, $chance);
 				$stmt->execute();
 				$id = $db->insert_id;
 
 				?>
 				<div class="alert alert-success"><span class="glyphicon glyphicon-ok-sign"></span> Your giveaway has been created.<br>
-					Your public URL is <a href="http://steamgiveaways.jacksonroberts.me/giveaway.php?id=<?php echo $id?>">http://steamgiveaways.jacksonroberts.me/giveaway.php?id=<?php echo $id?></a></div>
+					Your public URL is <a href="http://steamgiveaways.jacksonroberts.me/giveaway.php?token=<?php echo urlencode($token); ?>">http://steamgiveaways.jacksonroberts.me/giveaway.php?token=<?php echo urlencode($token); ?></a></div>
 				<?php
 			}
 		}

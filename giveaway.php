@@ -19,15 +19,15 @@
 	</nav>
 	<div class="container">
 		<?php
-		if (isset($_GET['id'])) {
-			$id = $_GET['id'];
+		if (isset($_GET['token'])) {
+      $token = $_GET['token'];
 			$db = new mysqli('REDACTED', 'REDACTED', 'REDACTED', 'REDACTED');
 
 			if($db->connect_errno > 0){
 			    die('Unable to connect to database [' . $db->connect_error . ']');
 			}
-			$stmt = $db->prepare('SELECT gametitle, gameplatform, chance, claimed, thankyou, userthankyou, gamekey FROM `keys` WHERE id=?');
-			$stmt->bind_param('i', $id);
+			$stmt = $db->prepare('SELECT id, gametitle, gameplatform, chance, claimed, thankyou, userthankyou, gamekey FROM `keys` WHERE token=?');
+			$stmt->bind_param('s', $token);
 			$stmt->execute();
 			$stmt->store_result();
 			$num_rows = $stmt->num_rows;
@@ -37,7 +37,7 @@
 			die();
 		}
 
-		$stmt->bind_result($title, $platform, $chance, $claimed, $ty, $uty, $gamekey);
+		$stmt->bind_result($id, $title, $platform, $chance, $claimed, $ty, $uty, $gamekey);
 		$stmt->fetch();
 
 		if ($_POST) {
