@@ -1,3 +1,6 @@
+<?php
+require_once "base.php";
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,11 +23,6 @@
 	<div class="container">
 		<?php
 		if (isset($_GET['token']) || isset($_GET['id'])) {
-			$db = new mysqli('REDACTED', 'REDACTED', 'REDACTED', 'REDACTED');
-
-			if($db->connect_errno > 0){
-			    die('Unable to connect to database [' . $db->connect_error . ']');
-			}
       if (isset($_GET['token'])) {
         $token = $_GET['token'];
         $stmt = $db->prepare('SELECT id, gametitle, gameplatform, chance, claimed, thankyou, userthankyou, gamekey FROM `keys` WHERE token=?');
@@ -45,66 +43,75 @@
 
 		$stmt->bind_result($id, $title, $platform, $chance, $claimed, $ty, $uty, $gamekey);
 		$stmt->fetch();
+    $showGiveawayEntry = true;
+    if ($_POST) {
+      $showGiveawayEntry = false;
+      if (isset($_POST['submit'])) {
+        if (empty(RECAPTCHA_PRIVATE_KEY)) {
+          $validReCAPTCHA = true;
+        } else {
+          require_once('recaptchalib.php');
+          $resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
+          $validReCAPTCHA = $resp->is_valid;
+        }
 
-		if ($_POST) {
-			if (!isset($_POST['name'])) {
-
-				require_once('recaptchalib.php');
-				$private_key = 'REDACTED';
-				$resp = recaptcha_check_answer($private_key, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
-
-				if (!$resp->is_valid) {
-					?>
-					<div class="alert alert-danger">You failed the captcha! Robot scum.</div>
-					<?php
-				} else {
-					$roll = mt_rand(1, $chance);
-					if ($roll == $chance) {
-						?>
-						<div class="alert alert-success">You won! Hooray! Your <?php echo $platform?> game key is <strong><?php echo $gamekey?></strong>.
-							<p>Please leave a note for the person who gifted you the game. This closes the giveaway and is mandatory.
-								<div class="form" style="margin-top: 20px">
-									<input name="key" type="hidden" value="<?php echo $gamekey; ?>">
-									<form class="form-horizontal" action="" method="POST">
-										<div class="form-group">
-											<label class="col-sm-2 control-label">Your username</label>
-											<div class="col-sm-5">
-												<input name="name" type="text" class="form-control" placeholder="Preferably your reddit one.">
-											</div>
-										</div>
-										<div class="form-group">
-											<label class="col-sm-2 control-label">Your message</label>
-											<div class="col-sm-5">
-												<textarea class="form-control" name="message"></textarea>
-											</div>
-										</div>
-										<div class="form-group">
-											<div class="col-sm-offset-2 col-sm-10">
-												<button type="submit" class="btn btn-primary">Go!</button>
-											</div>
-										</div>
-									</form>
-								</div>
-							</div>
-							<?php
-						} else {
-							?>
-							<div class="alert alert-warning">You didn't win. :(<br>Feel free to try again!<br>You rolled a <?php echo $roll?>. You must roll a <?php echo $chance?> to get the key.</div>
-								<?php
-							}
-						}
-					} else if (isset($_POST['key']) && ($_POST['key'] == $gamekey)) {
-						$thankyou = stripslashes(htmlspecialchars($_POST['message']));
-						$userthankyou = stripslashes(htmlspecialchars($_POST['name']));
-						$stmt = $db->prepare('UPDATE `keys` SET claimed=?, thankyou=?, userthankyou=? WHERE id=?');
-						$claimed = true;
-						$stmt->bind_param('issi', $claimed, $thankyou, $userthankyou, $id);
-						$stmt->execute();
-					} else {
-						// This should never be reached, unless some data is missing from POST requests...
-						echo "<div class=\"alert alert-warning\">Something went wrong - please try again.";
-					}
-				}
+        if ($validReCAPTCHA) {
+          $roll = crypto_rand_secure(1, $chance);
+          if ($roll == $chance) {
+            ?>
+            <div class="alert alert-success">You won! Hooray! Your <?php echo $platform?> game key is <strong><?php echo $gamekey?></strong>.
+              <p>Please leave a note for the person who gifted you the game. This closes the giveaway and is mandatory.
+                <div class="form" style="margin-top: 20px">
+                  <form class="form-horizontal" action="" method="POST">
+                    <input name="key" type="hidden" value="<?php echo $gamekey; ?>">
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label">Your username</label>
+                      <div class="col-sm-5">
+                        <input name="name" type="text" class="form-control" placeholder="Preferably your reddit one.">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label">Your message</label>
+                      <div class="col-sm-5">
+                        <textarea class="form-control" name="message"></textarea>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary">Go!</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <?php
+          } else {
+            ?>
+            <div class="alert alert-warning">You didn't win. :(<br>Feel free to try again!<br>You rolled a <?php echo $roll?>. You must roll a <?php echo $chance?> to get the key.</div>
+            <?php
+            $showGiveawayEntry = true;
+          }
+        } else {
+          ?>
+          <div class="alert alert-danger">You failed the captcha! Robot scum.</div>
+          <?php
+          $showGiveawayEntry = true;
+        }
+      } else if (isset($_POST['key']) && ($_POST['key'] == $gamekey)) {
+        $ty = stripslashes(htmlspecialchars($_POST['message']));
+        $uty = stripslashes(htmlspecialchars($_POST['name']));
+        $stmt = $db->prepare('UPDATE `keys` SET claimed=?, thankyou=?, userthankyou=? WHERE id=?');
+        $claimed = true;
+        $stmt->bind_param('issi', $claimed, $ty, $uty, $id);
+        $stmt->execute();
+        $showGiveawayEntry = true;
+      } else {
+        // This should never be reached, unless some data is missing from POST requests...
+        echo "<div class=\"alert alert-warning\">Something went wrong - please try again.</div>";
+        $showGiveawayEntry = true;
+      }
+    }
+    if ($showGiveawayEntry) {
 		?>
 		<div class="well">
 		<?php
@@ -112,13 +119,14 @@
 			?>
 			<p class="lead">This <?php echo $platform?> copy of <strong><?php echo $title?></strong> has not been claimed yet!</p>
 			<p>Fill out this CAPTCHA and click "Go!" for a 1 in <?php echo $chance;?> chance of getting the key! Good luck!</p>
-			<form action="" method="post">
+			<form action="" method="POST">
 			<?php
-			require_once('recaptchalib.php');
-			$pubkey = 'REDACTED';
-			echo recaptcha_get_html($pubkey);
+      if (!empty(RECAPTCHA_PUBLIC_KEY)) {
+        require_once('recaptchalib.php');
+        echo recaptcha_get_html(RECAPTCHA_PUBLIC_KEY);
+      }
 			?>
-			<button class="btn btn-lg btn-primary" style="margin-top: 15px;" type="submit">Go!</button>
+      <input type="submit" name="submit" value="Go!" class="btn btn-lg btn-primary" style="margin-top: 15px;">
 			</form>
 			<?php
 		} else {
@@ -133,6 +141,9 @@
 		}
 		?>
 		</div>
+    <?php
+    }
+    ?>
 	</div>
 </body>
 </html>
