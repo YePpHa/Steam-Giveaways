@@ -52,12 +52,13 @@
 					<div class="alert alert-danger">You failed the captcha! Robot scum.</div>
 					<?php
 				} else {
-					$roll = rand(1, $chance);
+					$roll = mt_rand(1, $chance);
 					if ($roll == $chance) {
 						?>
 						<div class="alert alert-success">You won! Hooray! Your <?php echo $platform?> game key is <strong><?php echo $gamekey?></strong>.
 							<p>Please leave a note for the person who gifted you the game. This closes the giveaway and is mandatory.
 								<div class="form" style="margin-top: 20px">
+									<input name="key" type="hidden" value="<?php echo $gamekey; ?>">
 									<form class="form-horizontal" action="" method="POST">
 										<div class="form-group">
 											<label class="col-sm-2 control-label">Your username</label>
@@ -86,15 +87,17 @@
 								<?php
 							}
 						}
-					} else {
+					} else if (isset($_POST['key']) && ($_POST['key'] == $gamekey)) {
 						$thankyou = htmlspecialchars($_POST['message']);
 						$userthankyou = htmlspecialchars($_POST['name']);
 						$stmt = $db->prepare('UPDATE `keys` SET claimed=?, thankyou=?, userthankyou=? WHERE id=?');
 						$claimed = true;
 						$stmt->bind_param('issi', $claimed, $thankyou, $userthankyou, $id);
 						$stmt->execute();
+					} else {
+						// This should never be reached, unless some data is missing from POST requests...
+						echo "<div class=\"alert alert-warning\">Something went wrong - please try again.";
 					}
-
 				}
 		?>
 		<div class="well">
