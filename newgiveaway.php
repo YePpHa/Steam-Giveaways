@@ -14,12 +14,12 @@ require_once "base.php";
 	<nav class="navbar navbar-default">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="/">Steam Giveaways</a>
+				<a class="navbar-brand" href="<?php echo BASEURL; ?>">Steam Giveaways</a>
 			</div>
 			<ul class="nav navbar-nav">
-				<li><a href="/">Home</a></li>
-				<li class="active"><a href="/newgiveaway.php">New Giveaway</a></li>
-				<li><a href="/donate.html">Donate</a></li>
+				<li><a href="<?php echo BASEURL; ?>">Home</a></li>
+				<li class="active"><a href="<?php echo BASEURL; ?>newgiveaway.php">New Giveaway</a></li>
+				<li><a href="<?php echo BASEURL; ?>donate.html">Donate</a></li>
 			</ul>
 		</div>
 	</nav>
@@ -61,7 +61,7 @@ require_once "base.php";
 
 				?>
 				<div class="alert alert-success"><span class="glyphicon glyphicon-ok-sign"></span> Your giveaway has been created.<br>
-					Your public URL is <a href="http://steamgiveaways.jacksonroberts.me/giveaway.php?token=<?php echo urlencode($token); ?>">http://steamgiveaways.jacksonroberts.me/giveaway.php?token=<?php echo urlencode($token); ?></a></div>
+					Your public URL is <a href="<?php echo BASEURL; ?>giveaway.php?token=<?php echo urlencode($token); ?>"><?php echo BASEURL; ?>giveaway.php?token=<?php echo urlencode($token); ?></a></div>
 				<?php
 			}
 		}

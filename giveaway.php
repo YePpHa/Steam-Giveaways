@@ -11,12 +11,12 @@ require_once "base.php";
 	<nav class="navbar navbar-default">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="/">Steam Giveaways</a>
+				<a class="navbar-brand" href="<?php echo BASEURL; ?>">Steam Giveaways</a>
 			</div>
 			<ul class="nav navbar-nav">
-				<li><a href="/">Home</a></li>
-				<li><a href="/newgiveaway.php">New Giveaway</a></li>
-				<li><a href="/donate.html">Donate</a></li>
+				<li><a href="<?php echo BASEURL; ?>">Home</a></li>
+				<li><a href="<?php echo BASEURL; ?>newgiveaway.php">New Giveaway</a></li>
+				<li><a href="<?php echo BASEURL; ?>donate.html">Donate</a></li>
 			</ul>
 		</div>
 	</nav>

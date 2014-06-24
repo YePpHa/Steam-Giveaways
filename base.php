@@ -29,6 +29,7 @@ function getToken($length = 64) {
 }
 
 /* Config */
+define("BASEURL", "http://steamgiveaways.jacksonroberts.me/");
 define("DB_HOST", "REDACTED");
 define("DB_USER", "REDACTED");
 define("DB_PASS", "REDACTED");
