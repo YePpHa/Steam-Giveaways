@@ -88,8 +88,8 @@
 							}
 						}
 					} else if (isset($_POST['key']) && ($_POST['key'] == $gamekey)) {
-						$thankyou = htmlspecialchars($_POST['message']);
-						$userthankyou = htmlspecialchars($_POST['name']);
+						$thankyou = stripslashes(htmlspecialchars($_POST['message']));
+						$userthankyou = stripslashes(htmlspecialchars($_POST['name']));
 						$stmt = $db->prepare('UPDATE `keys` SET claimed=?, thankyou=?, userthankyou=? WHERE id=?');
 						$claimed = true;
 						$stmt->bind_param('issi', $claimed, $thankyou, $userthankyou, $id);
